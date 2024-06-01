@@ -7,16 +7,16 @@ This project involves predicting house prices in Bangalore using machine learnin
 The dataset used in this project is `BangaloreHousing.csv`. It includes various features related to house properties in Bangalore, such as the area, number of bedrooms, and the presence of amenities like a gymnasium, swimming pool, etc.
 
 ## Project Structure
-- **📦 Import Libraries**: Import necessary libraries for data manipulation, visualization, and machine learning.
+- **📦 Import Libraries**: Import necessary libraries for `data manipulation`, `visualization`, and `machine learning`.
 - **📊 Load Data**: Load the dataset and visualize the distribution of house prices.
 - **❌ Remove Outliers**: Identify and remove extreme outliers from the `Price` column.
 - **📐 Feature Selection and Standardization**: Select relevant features and standardize them.
-- **📈 Train-Test Split and Linear Regression**: Train and evaluate a basic linear regression model.
-- **🔍 Check for Multicollinearity**: Calculate Variance Inflation Factor (VIF) to identify multicollinearity.
-- **✂️ Remove High VIF Features**: Remove features with high VIF values.
-- **🔄 Recursive Feature Elimination (RFE)**: Select top features using RFE.
+- **📈 Train-Test Split and Linear Regression**: Train and evaluate a basic `linear regression` model.
+- **🔍 Check for Multicollinearity**: Calculate `Variance Inflation Factor (VIF)` to identify `multicollinearity`.
+- **✂️ Remove High VIF Features**: Remove features with `high VIF` values.
+- **🔄 Recursive Feature Elimination (RFE)**: Select top features using `RFE`.
 - **📉 Polynomial Features and Linear Regression**: Generate polynomial features and train a linear regression model.
-- **🔗 Ridge Regression**: Train and evaluate a ridge regression model, with cross-validation for performance stability.
+- **🔗 Ridge Regression**: Train and evaluate a `ridge regression` model, with `cross-validation` for performance stability.
 
 ## Requirements
 - Python 3.x
