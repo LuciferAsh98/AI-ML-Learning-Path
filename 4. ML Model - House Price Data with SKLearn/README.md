@@ -18,47 +18,6 @@ The dataset used in this project is `BangaloreHousing.csv`. It includes various 
 - **Polynomial Features and Linear Regression**: Generate polynomial features and train a linear regression model.
 - **Ridge Regression**: Train and evaluate a ridge regression model, with cross-validation for performance stability.
 
-## Methodology
-
-### 1. Import Libraries
-Importing essential libraries for data handling, visualization, and machine learning.
-
-### 2. Load Data
-Loading the dataset from a CSV file and displaying the first few rows to understand its structure.
-
-### 3. Visualize the Distribution of House Prices
-Creating a histogram to visualize the distribution of house prices and identify potential outliers.
-
-### 4. Remove Outliers
-Removing extreme outliers from the `Price` column to ensure better model performance and then rechecking the distribution.
-
-### 5. Feature Selection and Standardization
-Selecting a subset of relevant features for the model and standardizing these features to have a mean of 0 and a standard deviation of 1.
-
-### 6. Train-Test Split and Linear Regression
-Splitting the data into training and testing sets, training a linear regression model, and evaluating its performance using Mean Squared Error (MSE) and R-squared (R²) score.
-
-### 7. Visualization for Linear Regression
-Visualizing the actual vs. predicted prices and the residuals to assess the model's performance. Displaying the model coefficients and intercept.
-
-### 8. Check for Multicollinearity
-Calculating the Variance Inflation Factor (VIF) to identify multicollinearity among features.
-
-### 9. Remove High VIF Features
-Removing features with high VIF values to reduce multicollinearity and improve the model's stability.
-
-### 10. Recursive Feature Elimination (RFE)
-Using RFE to select the top features that contribute the most to the model's prediction.
-
-### 11. Polynomial Features and Linear Regression
-Generating polynomial features to capture non-linear relationships and training a linear regression model with these features. Evaluating the improved model's performance.
-
-### 12. Remove Outliers from Features
-Removing outliers from the selected features to further refine the model.
-
-### 13. Ridge Regression
-Applying ridge regression to address overfitting by adding a regularization term to the linear regression. Evaluating the model with cross-validation to ensure performance stability.
-
 ## Requirements
 - Python 3.x
 - pandas
@@ -82,3 +41,46 @@ pip install pandas numpy matplotlib seaborn scikit-learn statsmodels
 ```css
 This `README.md` provides a comprehensive overview of your project, detailing the steps taken and the rationale behind them without including the code itself, as per your request.
 ```
+
+## Methodology
+
+### 1. Importing Libraries
+Importing essential libraries for data handling, visualization, and machine learning.
+
+### 2. Loading Data
+Loading the dataset from a CSV file and display the structure of the dataset, highlighting at least the first few rows.
+
+### 3. Visualizing the Distribution of House Prices
+Histogram for the distribution of house prices. This will help to see if there are outliers.
+
+### 4. Removing Outliers
+Removing the significant outliers for the Price column to fine-tune the model and recheck the distribution.
+
+### 5. Feature Selection and Standardization
+Subsetting relevant features for the model and standardizing each feature with a mean of 0 and a standard deviation of 1.
+
+### 6. Train-Test Splitting and Linear Regression
+Splitting the data into training and test datasets, train the model using linear regression, and evaluate the model's performance using the Mean Squared Error and R-squared (R²) score.
+
+### 7. Visualization for Linear Regression
+Visualizing the Actual vs. Predicted Prices
+Plotting the actual values against the predicted values for the prices with the residuals to understand how well the model works visually. Printing the coefficients and an intercept of the model.
+
+### 8. Checking for Multicollinearity
+Calculating the Variance Inflation Factor (VIF) to determine multicollinearity among features.
+
+### 9. Removing High VIF Features
+Variables that exhibit very high VIF values are dropped to reduce the multicollinearity and to make the model more stable.
+
+### 10. Recursive Feature Elimination (RFE)
+Applying RFE to pick the best features contributing most to the model's prediction.
+
+### 11. Polynomial Features and Linear Regression
+Polynomial features are generated to account for the non-linearity in the relationships, and then the linear model is retrained using these features. The model is then validated on how improved it is.
+
+### 12. Removing Outliers from Features
+Removing the values of selected features with outliers to improve the model further.
+
+### 13. Ridge Regression
+Applying ridge regression to address/overcome overfitting - in which a regularization term is applied to linear regression . Cross-validation of model performance ensures that such performance is replicable.
+
