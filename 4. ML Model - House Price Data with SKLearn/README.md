@@ -7,7 +7,7 @@ This project involves predicting house prices in Bangalore using machine learnin
 The dataset used in this project is `BangaloreHousing.csv`. It includes various features related to house properties in Bangalore, such as the area, number of bedrooms, and the presence of amenities like a gymnasium, swimming pool, etc.
 
 ## Project Structure
-- **Import Libraries**: Import necessary libraries for 'data manipulation', 'visualization', and 'machine learning'.
+- **Import Libraries**: Import necessary libraries for 'data manipulation', 'Visualization', and 'machine learning'.
 - **Load Data**: Load the dataset and visualize the distribution of house prices.
 - **Remove Outliers**: Identify and remove 'extreme outliers' from the `Price` column.
 - **Feature Selection and Standardization**: Select 'relevant features' and standardize them.
