@@ -83,3 +83,5 @@ Removing the values of selected features with outliers to improve the model furt
 ### 13. Ridge Regression
 Applying ridge regression to address/overcome overfitting - in which a regularization term is applied to linear regression . Cross-validation of model performance ensures that such performance is replicable.
 
+Combining the Ridge regression with the linear model did a great job in its performance. The R^2 score came up to be about 0.773, which means the present model explains about 77.3% of the variation in the target variable. The cross-validated R^2 scores are not very varied, with the average being about 0.744. This means that the model generalizes well.
+
