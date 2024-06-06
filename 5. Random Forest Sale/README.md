@@ -10,7 +10,5 @@
 
 ## Running the Notebook
 
-
-
 ## Methodology
 
