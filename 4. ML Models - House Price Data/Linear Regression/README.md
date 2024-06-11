@@ -17,19 +17,19 @@ This project demonstrates a machine learning model to predict house prices in Ba
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/LuciferAsh98/AI-ML-Learning-Path/
-
+   ```
 
 2. **Train the model:**
    ```bash
-python model_training.py
-
+   python model_training.py
+   ```
 
 
 💻 Execute App Locally on WebApp
 
 ```bash
 streamlit run app.py
-
+```
 
 Enter House Details to get the PRICE. Enjoy !! 🎉
 
