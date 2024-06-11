@@ -19,17 +19,11 @@ This project demonstrates a machine learning model to predict house prices in Ba
    git clone https://github.com/LuciferAsh98/AI-ML-Learning-Path/
    ```
 
-
-2. Train the model:
-Run model_training.py 
+2. **Train the model:**
+Run model_training.py or model_training_with_prints.py to train the model.
 
    ```bash
 python model_training.py
-   ```
-or model_training_with_prints.py to train the model.
-
-   ```bash
-python model_training_with_prints.py
    ```
 
 💻 Execute App Locally on WebApp
