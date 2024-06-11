@@ -24,7 +24,6 @@ This project demonstrates a machine learning model to predict house prices in Ba
 python model_training.py
    ```
 
-Run model_training.py or model_training_with_prints.py to train the model.
 
 💻 Execute App Locally on WebApp
 
