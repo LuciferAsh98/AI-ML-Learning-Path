@@ -76,13 +76,13 @@ def get_user_input():
     balcony = st.number_input('Number of Balconies', min_value=0)
     
     location = st.selectbox('Location', unique_locations)
-    area_type = st.selectbox('Area Type', ['Super built-up  Area', 'Built-up  Area', 'Plot  Area', 'Carpet  Area'])
+    area_type = st.selectbox('Area Type', ['Super built-up Area', 'Built-up Area', 'Plot Area', 'Carpet Area'])
     
     # Convert the location and area type to the appropriate dummy variables
     location_dict = {f'location_{loc}': 0 for loc in unique_locations}
     location_dict[f'location_{location}'] = 1
     
-    area_type_dict = {f'area_type_{area}': 0 for area in ['Super built-up  Area', 'Built-up  Area', 'Plot  Area', 'Carpet  Area']}
+    area_type_dict = {f'area_type_{area}': 0 for area in ['Super built-up Area', 'Built-up Area', 'Plot Area', 'Carpet Area']}
     area_type_dict[f'area_type_{area_type}'] = 1
     
     # Create a DataFrame for the input
@@ -110,8 +110,10 @@ input_data = get_user_input()
 # Predict house price
 if st.button('Predict'):
     prediction = model.predict(input_data)
-    prediction = max(prediction[0], 0)  # Ensure non-negative prediction
-    st.write(f'Predicted House Price: ₹{prediction:,.2f}K')
+    if prediction[0] == 0:
+        st.write("House with the given specifications is not available in the area. Please try different specifications.")
+    else:
+        st.write(f'Predicted House Price: ₹{prediction[0]:,.2f}K')
 
 # Add a footer image
 st.image("Images/HeadImage2.webp", use_column_width=True)
@@ -122,3 +124,4 @@ st.markdown("""
     Thank you for using our Bengaluru House Price Prediction tool. If you have any questions or feedback, please contact us.
 </div>
 """, unsafe_allow_html=True)
+
