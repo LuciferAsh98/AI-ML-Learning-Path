@@ -28,7 +28,7 @@ This project demonstrates a machine learning model to predict house prices in Ba
 ## 💻 Execute App Locally on WebApp
 
 ```bash
-streamlit run app.py
+streamlit run LR_app.py
 ```
 
 Enter House Details to get the PRICE. Enjoy !! 🎉
