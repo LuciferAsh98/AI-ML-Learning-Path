@@ -25,13 +25,14 @@ This project demonstrates a machine learning model to predict house prices in Ba
    ```
 
 
-💻 Execute App Locally on WebApp
+## 💻 Execute App Locally on WebApp
 
 ```bash
 streamlit run app.py
 ```
 
 Enter House Details to get the PRICE. Enjoy !! 🎉
+
 
 
 # 🏡 Real Estate Price Prediction - Technical Description
