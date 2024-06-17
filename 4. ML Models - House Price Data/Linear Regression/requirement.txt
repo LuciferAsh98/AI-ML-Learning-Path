@@ -1,4 +1,4 @@
-- streamlit
-- matplotlib
-- scikitlearn
-- joblib
+streamlit
+matplotlib
+scikit-learn
+joblib
