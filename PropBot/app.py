@@ -1,102 +1,142 @@
 import os
+import pinecone
+from pathlib import Path
 import streamlit as st
-import pandas as pd
 import openai
-from dotenv import load_dotenv
-from streamlit_chat import message
+from langchain.chains import ConversationalRetrievalChain
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma, Pinecone
+from langchain.document_loaders import DirectoryLoader, PyPDFLoader, CSVLoader
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.llms import OpenAIChat
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone, ServerlessSpec
 
-# Load environment variables from .env file
-load_dotenv()
+# Define paths explicitly
+TMP_DIR = Path('./data/tmp')
+LOCAL_VECTOR_STORE_DIR = Path('./data/vector_store')
 
-# Set OpenAI API key from environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+st.set_page_config(page_title="RAG Chatbot")
 
-# Title of the Streamlit app
-st.title("PropBot - Your Real Estate Chatbot")
-st.write("Hey, my name is PropBot from Zummit. What can I help you with today?")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+pc = Pinecone(api_key="pine_key", environment="us-east-1")
+index = 'real-estate'
+print("jajflnsfnalkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", pc.list_indexes().names())
+if index not in pc.list_indexes().names():
+    pc.create_index(
+        name=index,
+        dimension=1536,
+        metric='euclidean',
+        spec=ServerlessSpec(
+            cloud='aws',
+            region='us-west-2'
+        )
+    )
+# Load documents from specified directory
+def load_documents():
+    pdf_loader = DirectoryLoader(TMP_DIR.as_posix(), glob='**/*.pdf', loader_cls=PyPDFLoader)
+    csv_loader = DirectoryLoader(TMP_DIR.as_posix(), glob='**/*.csv', loader_cls=CSVLoader)
+    pdf_documents = pdf_loader.load()
+    csv_documents = csv_loader.load()
+    return pdf_documents + csv_documents
 
-# Load the datasets
-land_data = pd.read_csv('land_api_responses.csv')
-residential_data = pd.read_csv('res_api_responses.csv')
+# Split documents into manageable chunks
+def split_documents(documents):
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    return text_splitter.split_documents(documents)
 
-# Data cleaning: strip any leading/trailing spaces from column names
-land_data.columns = land_data.columns.str.strip()
-residential_data.columns = residential_data.columns.str.strip()
+# Create embeddings using a local vector database
+def embeddings_on_local_vectordb(texts):
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    class EmbeddingFunction:
+        def __call__(self, input):
+            return embeddings.embed_documents(input)
+    embedding_function = EmbeddingFunction()
+    vectordb = Chroma.from_documents(texts, embedding=embedding_function,
+                                     persist_directory=LOCAL_VECTOR_STORE_DIR.as_posix())
+    vectordb.persist()
+    return vectordb.as_retriever(search_kwargs={'k': 7})
 
-# Function to filter properties based on user input
-def filter_properties(location, rooms, sector):
-    location_lower = location.strip().lower()
-    sector_lower = sector.strip().lower()
+# Initialize Pinecone vector store
+embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+pinecone_vector_store = PineconeVectorStore(
+    index_name="real-estate",
+    pinecone_api_key="pine_key",
+    embedding=embeddings
+)
+
+# Create embeddings using Pinecone
+def embeddings_on_pinecone(texts):
+    # You may need to handle batching of documents if they are large
+    batch_size = 50
+    for i in range(0, len(texts), batch_size):
+        batch_texts = texts[i:i + batch_size]
+        print("======================================",batch_texts)
+        try:
+            # Add documents to Pinecone
+            print("......................................",batch_texts)
+            pinecone_vector_store.add_documents(batch_texts)
+        except openai.OpenAIError as e:
+            st.error(f"An OpenAI error occurred: {str(e)}")
+            return None
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {str(e)}")
+            return None
+        
+    return pinecone_vector_store
+
+
+# Handle queries to the language model
+def query_llm(retriever, query):
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm=OpenAIChat(openai_api_key=openai_api_key),
+        retriever=retriever,
+        return_source_documents=True,
+    )
+    result = qa_chain({'question': query, 'chat_history': st.session_state.get('messages', [])})
+    st.session_state.messages.append((query, result['answer']))
+    return result['answer']
+
+# Input fields for user interaction
+def input_fields():
+    st.session_state.pinecone_db = st.checkbox('Use Pinecone Vector DB')
+    st.session_state.source_docs = st.file_uploader("Upload Documents", type=['pdf', 'csv'], accept_multiple_files=True)
+
+# Process uploaded documents
+def process_documents():
+    if not st.session_state.source_docs:
+        st.warning("Please upload documents.")
+        return
+
+    TMP_DIR.mkdir(parents=True, exist_ok=True)
+    for source_doc in st.session_state.source_docs:
+        with open(TMP_DIR / source_doc.name, 'wb') as f:
+            f.write(source_doc.read())
     
-    matched_land_properties = land_data[
-        (land_data['Area'].str.lower() == location_lower) &
-        (land_data['Sector'].str.lower() == sector_lower)
-    ]
+    documents = load_documents()
+    texts = split_documents(documents)
     
-    matched_residential_properties = residential_data[
-        (residential_data['Area'].str.lower() == location_lower) &
-        (residential_data['Residential No of Rooms'].astype(str) == str(rooms)) &
-        (residential_data['Sector'].str.lower() == sector_lower)
-    ]
-    
-    matched_properties = pd.concat([matched_land_properties, matched_residential_properties])
-    
-    return matched_properties
-
-# Combine unique sectors and locations from both datasets
-combined_sectors = pd.concat([land_data['Sector'], residential_data['Sector']]).unique()
-combined_locations = pd.concat([land_data['Area'], residential_data['Area']]).unique()
-combined_rooms = sorted(residential_data['Residential No of Rooms'].unique())
-
-# Streamlit interface for property filters
-location = st.selectbox('Select Location', sorted(combined_locations), key='location')
-rooms = st.selectbox('Select Number of Rooms', combined_rooms, key='rooms')
-sector = st.selectbox('Select Sector', sorted(combined_sectors), key='sector')
-
-matched_properties = pd.DataFrame()  # Initialize as an empty DataFrame
-
-if st.button('Get Properties'):
-    matched_properties = filter_properties(location, rooms, sector)
-    st.session_state.matched_properties = matched_properties
-    
-    if not matched_properties.empty:
-        response = f"Here are the properties in {location}:\n"
-        for index, row in matched_properties.iterrows():
-            response += f"ID: {index}\nSector: {row['Sector']}\nNo of Rooms: {row.get('Residential No of Rooms', 'N/A')}\nSales Cost: {row['Sales Cost (Local)']}\nRent Cost: {row.get('Rents Cost (Local)', 'N/A')}\n\n"
-        st.write(response.strip())
+    if not st.session_state.pinecone_db:
+        st.session_state.retriever = embeddings_on_local_vectordb(texts)
     else:
-        st.write(f"Sorry, no properties found in {location} with {rooms} rooms in {sector} sector.")
-else:
-    st.session_state.matched_properties = pd.DataFrame()  # Initialize as an empty DataFrame
+        st.session_state.retriever = embeddings_on_pinecone(texts)
 
-# Initialize session state for messages
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# Boot the application
+def boot():
+    input_fields()
+    st.button("Submit Documents", on_click=process_documents)
+    
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    for message in st.session_state.messages:
+        st.write(f"**User**: {message[0]}")
+        st.write(f"**Bot**: {message[1]}")
+    
+    if query := st.text_input("Ask a question:"):
+        st.write(f"**User**: {query}")
+        response = query_llm(st.session_state.retriever, query)
+        st.write(f"**Bot**: {response}")
 
-# Display previous chat messages
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Chat input and response generation
-if prompt := st.chat_input("What is up?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        for response in openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        ):
-            full_response += response.choices[0].delta.get("content", "")
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
-
+if __name__ == '__main__':
+    boot()
